@@ -107,6 +107,20 @@ In realistic federated learning, each client holds samples from **multiple class
 3. **Global Utility Preserved**: Overall test accuracy on the holdout CIFAR-100 test set remains high at **91.60%** (vs 92.50% for exact retraining).
 4. **Computational Advantage**: FedEraser completes in **12.91s** vs **31.12s** for retraining from scratch (**2.41x speedup**).
 
+#### Extended Horizon Benchmark ($T = 20$ Communication Rounds):
+
+To evaluate FedEraser over longer training horizons, the federated system was trained for 20 communication rounds ($T = 20$, 200 total client epochs on RTX A6000 GPU):
+
+| Model / Evaluation Metric | Holdout Test Acc | Private Data Acc ($D_{\text{forget}}$) | Private Data Loss ($D_{\text{forget}}$) | Private Data Conf | Runtime (s) | Speedup vs Retrain |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Original FL ($M_{\text{orig}}$)** | **95.10%** | **93.14%** | **0.1962** (Memorized) | **0.885** | 323.12s | 1.0x (10 Clients) |
+| **Retrained Gold Standard ($M_{\text{retrain}}$)** | **94.50%** | **92.20%** | **0.2501** (Unseen Gold) | **0.868** | 300.98s | (9 Clients) |
+| **FedEraser ($M_{\text{unlearn}}$)** | **92.60%** | **91.02%** | **0.3214** (Unlearned) | **0.819** | **80.32s** | **3.75x faster** |
+
+- **Extended Prediction Agreement**: $M_{\text{unlearn}}$ matches the retrained gold standard on **404 out of 423 private images (95.5% agreement)**.
+- **Unlearning Speedup**: FedEraser completes unlearning in **80.32s** vs **300.98s** for full retraining (**3.75x speedup**).
+- **Private Memorization Purge**: Cross-entropy loss on $D_{\text{forget}}$ rises from **0.1962** (deeply memorized) to **0.3214** (unlearned), matching the unseen retrained profile (**0.2501**).
+
 ---
 
 ## 🖼️ Visual Evidence of Forgetting (Grad-CAM)

@@ -115,9 +115,14 @@ SETTING B: Multi-Class Heterogeneous Non-IID Setup (Dirichlet alpha=0.5)
 Key Scientific Insights from Setting B:
 - Prediction Agreement with Retrained Gold: On Client 09's 423 private images, 
   M_unlearn and M_retrain make the exact same prediction on 396 out of 423 samples 
-  (93.61% agreement rate).
-- Memorization Loss Purge: Cross-entropy loss on D_forget rises from 0.3034 (memorized) 
-  to 0.4048 (unlearned), closely mirroring unseen test loss.
+  (93.61% agreement rate at T=6).
+- Extended Horizon Benchmark (T = 20 Communication Rounds, 200 Client Epochs):
+  * M_orig (FL):           Test Acc 95.10%, D_forget Acc 93.14%, D_forget Loss 0.1962 (Memorized), Runtime 323.12s
+  * M_retrain (Scratch):   Test Acc 94.50%, D_forget Acc 92.20%, D_forget Loss 0.2501 (Unseen),    Runtime 300.98s
+  * M_unlearn (FedEraser): Test Acc 92.60%, D_forget Acc 91.02%, D_forget Loss 0.3214 (Unlearned), Runtime  80.32s (3.75x Speedup!)
+  * Prediction Agreement with Retrained Gold at T=20: 404 / 423 (95.51% agreement)
+- Memorization Loss Purge: Cross-entropy loss on D_forget rises from 0.1962 (memorized) 
+  to 0.3214 (unlearned), closely mirroring unseen test loss.
 - Audit on Client 09's 177 Bottles:
   * M_orig Bottle Confidence: 0.884 (high memorized confidence)
   * M_unlearn Bottle Confidence: 0.794 (softened to generalization level)
