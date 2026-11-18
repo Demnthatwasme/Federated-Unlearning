@@ -542,14 +542,15 @@ Contributions, Key Learnings & Future Roadmap
   3. Verified empirical benchmarks at both T=6 and T=20 communication rounds on RTX A6000 GPU.
   4. Spatial Grad-CAM visual attribution auditor measuring Pearson attention drift (|Delta CAM|).
   5. Mathematical formulation, implementation, and empirical audit of Fed-CNS (Contrastive Null Space).
-  6. Interactive Streamlit dashboard ([app.py]) and fully documented open-source GitHub repository.
+  6. Quantitative Membership Inference Attack (MIA) Privacy Auditor: Full ROC-AUC curves, loss thresholding, and TPR @ 5% FPR benchmarks.
+  7. Interactive Streamlit dashboard ([app.py]) and fully documented open-source GitHub repository.
 - Key Academic Learnings:
   * Representation engineering (frozen BN, cosine heads) is vital to prevent Non-IID collapse.
   * In multi-class FL, unlearning is about private memorization loss elevation, not zeroing class recall.
+  * Privacy verification requires dual auditing: Spatial Grad-CAM drift for visual XAI, and MIA ROC-AUC for quantitative leakage bounds.
   * Storage and client-offline constraints can be solved using additive sufficient statistics.
 - Immediate Next Steps:
-  * Implementing Loss-Threshold Membership Inference Attacks (MIA) to audit MIA-AUC.
-  * Benchmarking the Class-Conditional Ledger on multi-class setups.
+  * Benchmarking the Class-Conditional Ledger with shadow models.
 - Open Source Codebase: https://github.com/Demnthatwasme/Federated-Unlearning
 
 [how to present]
