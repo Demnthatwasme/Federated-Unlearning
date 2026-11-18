@@ -95,8 +95,14 @@ class MembershipInferenceAuditor:
         auc_loss = float(roc_auc_score(y_true, scores))
 
         # 2. Confidence-based threshold attack:
-        conf_scores = np.concatenate([forget_signals["confidences"], -nonmember_signals["confidences"]])
-        auc_conf = float(roc_auc_score(y_true, np.concatenate([forget_signals["confidences"], nonmember_signals["confidences"]])))
+        # Members have higher confidence; higher confidence -> higher probability of membership
+        conf_scores = np.concatenate([forget_signals["confidences"], nonmember_signals["confidences"]])
+        auc_conf = float(roc_auc_score(y_true, conf_scores))
+
+        # 3. Entropy-based threshold attack:
+        # Members have lower prediction entropy; negative entropy is higher for members
+        entropy_scores = np.concatenate([-forget_signals["entropies"], -nonmember_signals["entropies"]])
+        auc_entropy = float(roc_auc_score(y_true, entropy_scores))
 
         # 3. Best threshold attack accuracy
         threshold_idx = np.argmax(tpr - fpr)
@@ -115,6 +121,7 @@ class MembershipInferenceAuditor:
             "model_name": model_name,
             "auc_loss": auc_loss,
             "auc_confidence": auc_conf,
+            "auc_entropy": auc_entropy,
             "attack_accuracy": attack_acc,
             "tpr_at_5pct_fpr": tpr_at_low_fpr,
             "forget_mean_loss": float(np.mean(forget_signals["losses"])),

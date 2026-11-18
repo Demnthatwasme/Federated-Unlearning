@@ -1,0 +1,38 @@
+{
+  "partition_mode": "multi_class",
+  "forget_client": 9,
+  "models": {
+    "original": {
+      "auc_loss": 0.518241134751773,
+      "auc_confidence": 0.5177494089834516,
+      "auc_entropy": 0.515888888888889,
+      "attack_accuracy": 0.607167955024596,
+      "tpr_at_5pct_fpr": 0.08274231678486997,
+      "forget_mean_loss": 0.19620836887400747,
+      "forget_std_loss": 0.5069873542228586,
+      "nonmember_mean_loss": 0.1906356480870163
+    },
+    "retrained": {
+      "auc_loss": 0.5033782505910166,
+      "auc_confidence": 0.504692671394799,
+      "auc_entropy": 0.5024917257683215,
+      "attack_accuracy": 0.6148981026001406,
+      "tpr_at_5pct_fpr": 0.07328605200945626,
+      "forget_mean_loss": 0.2501088484241594,
+      "forget_std_loss": 0.634997648969276,
+      "nonmember_mean_loss": 0.1978317384936381
+    },
+    "federaser": {
+      "auc_loss": 0.48326832151300236,
+      "auc_confidence": 0.49021867612293146,
+      "auc_entropy": 0.49196690307328605,
+      "attack_accuracy": 0.6141953619114546,
+      "tpr_at_5pct_fpr": 0.030732860520094562,
+      "forget_mean_loss": 0.32139627513394253,
+      "forget_std_loss": 0.6594825451605338,
+      "nonmember_mean_loss": 0.2377640251060948,
+      "auc_reduction": 0.03497281323877066
+    }
+  },
+  "plot_path": "results/multi_class/mia_audit_comparison.png"
+}
