@@ -5,7 +5,7 @@
     "num_clients": 10,
     "dirichlet_alpha": 0.5,
     "forget_client": 9,
-    "num_rounds": 6,
+    "num_rounds": 20,
     "local_epochs": 2,
     "learning_rate": 0.003,
     "cali_steps": 4,
@@ -21,72 +21,72 @@
   "forget_class_name": "Client 9",
   "models": {
     "original": {
-      "overall_acc": 0.93,
-      "retain_acc": 0.93,
-      "forget_acc": 0.9243498817966903,
-      "forget_conf": 0.8103811509651847,
-      "forget_train_loss": 0.3033802762240101,
-      "runtime_seconds": 34.903218030929565
+      "overall_acc": 0.951,
+      "retain_acc": 0.951,
+      "forget_acc": 0.9314420803782506,
+      "forget_conf": 0.8851920011195731,
+      "forget_train_loss": 0.19620836644167033,
+      "runtime_seconds": 323.123872756958
     },
     "federaser": {
-      "overall_acc": 0.916,
-      "retain_acc": 0.916,
-      "forget_acc": 0.8936170212765957,
-      "forget_conf": 0.7514281335526782,
-      "forget_train_loss": 0.4045775053630766,
-      "runtime_seconds": 12.354748010635376,
-      "speedup_vs_retrain": 2.509834749879915,
-      "avg_forget_cam_drift": 0.212,
-      "avg_retain_cam_drift": 0.021,
-      "prediction_agreement_with_retrain": 93.61702127659575,
+      "overall_acc": 0.926,
+      "retain_acc": 0.926,
+      "forget_acc": 0.9101654846335697,
+      "forget_conf": 0.8185239800210188,
+      "forget_train_loss": 0.321396277446837,
+      "runtime_seconds": 80.31806087493896,
+      "speedup_vs_retrain": 3.7472908916168923,
+      "avg_forget_cam_drift": 0.04219891627629598,
+      "avg_retain_cam_drift": 0.059162755807240806,
+      "prediction_agreement_with_retrain": 95.50827423167848,
       "redistribution_map": {}
     },
     "retrained": {
-      "overall_acc": 0.924,
-      "retain_acc": 0.924,
-      "forget_acc": 0.9030732860520094,
-      "forget_conf": 0.7910085564906363,
-      "forget_train_loss": 0.3546853022513378,
-      "runtime_seconds": 31.008375883102417
+      "overall_acc": 0.945,
+      "retain_acc": 0.945,
+      "forget_acc": 0.9219858156028369,
+      "forget_conf": 0.8678227087172369,
+      "forget_train_loss": 0.2501088462893281,
+      "runtime_seconds": 300.97513794898987
     }
   },
   "gradcam_gallery_path": "results/multi_class/gradcam_unlearning_comparison.png",
   "drift_records": [
     {
       "sample_idx": 0,
-      "true_class": "apple",
+      "true_class": "bottle",
       "is_forget": true,
-      "cam_drift": 0.05340319871902466
+      "cam_drift": 0.011748433113098145
     },
     {
       "sample_idx": 1,
-      "true_class": "apple",
+      "true_class": "bottle",
       "is_forget": true,
-      "cam_drift": 0.04252582788467407
+      "cam_drift": 0.0564083456993103
     },
     {
       "sample_idx": 2,
-      "true_class": "apple",
+      "true_class": "bottle",
       "is_forget": true,
-      "cam_drift": 0.005882918834686279
+      "cam_drift": 0.05843997001647949
     },
     {
       "sample_idx": 3,
       "true_class": "apple",
       "is_forget": false,
-      "cam_drift": 0.0040451884269714355
+      "cam_drift": 0.01163262128829956
     },
     {
       "sample_idx": 4,
       "true_class": "apple",
       "is_forget": false,
-      "cam_drift": 0.030294358730316162
+      "cam_drift": 0.05049699544906616
     },
     {
       "sample_idx": 5,
       "true_class": "apple",
       "is_forget": false,
-      "cam_drift": 0.02950376272201538
+      "cam_drift": 0.11535865068435669
     }
   ]
 }
