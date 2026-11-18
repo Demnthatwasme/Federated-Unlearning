@@ -2,7 +2,7 @@
 FEDERATED UNLEARNING FOR VISION MODELS: SYSTEM ARCHITECTURE & RESEARCH BRIEF
 ================================================================================
 Project: Federated Unlearning for Vision Models with Auditing & Visualization
-Target Dataset: CIFAR-100 (Image Classification)
+Target Dataset: CIFAR-100 (10-Class Benchmark Subset: Classes 0-9)
 Framework: PyTorch + Flower (flwr) Federated Learning Architecture
 Compute Hardware: NVIDIA RTX A6000 GPU (Linux)
 Date: November 2026
@@ -128,7 +128,7 @@ Key Scientific Insights from Setting B:
 --------------------------------------------------------------------------------
 4. HOW THE FEDERASER BASELINE WORKS (AND ITS BOTTLENECKS)
 --------------------------------------------------------------------------------
-FedEraser (Wang et al., IEEE/ACM IWQoS 2021) trades server storage for speed:
+FedEraser (Gaoyang Liu, Xiaoqiang Ma, Yang Yang, et al., IEEE/ACM IWQoS 2021) trades server storage for speed:
 1. Historical Logging during FL:
    The server caches initial weights W_0, all round checkpoints W_1 ... W_T, and 
    the client parameter update vectors Delta W_{t, k} = W_{t, k} - W_{t-1}.

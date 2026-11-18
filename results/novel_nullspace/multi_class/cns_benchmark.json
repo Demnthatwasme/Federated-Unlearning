@@ -1,0 +1,33 @@
+{
+  "partition_mode": "multi_class",
+  "forget_client": 9,
+  "models": {
+    "retrained": {
+      "overall_acc": 0.924,
+      "forget_acc": 0.9030732860520094,
+      "forget_train_loss": 0.3546853022513378,
+      "runtime_seconds": 31.008375883102417
+    },
+    "federaser": {
+      "overall_acc": 0.916,
+      "forget_acc": 0.8936170212765957,
+      "forget_train_loss": 0.4045775053630766,
+      "prediction_agreement_with_retrain": 93.61702127659575,
+      "runtime_seconds": 12.354748010635376,
+      "storage_overhead": "2.2 GB"
+    },
+    "fed_cns": {
+      "overall_acc": 0.915,
+      "forget_acc": 0.9219858156028369,
+      "forget_train_loss": 0.2953970798645741,
+      "prediction_agreement_with_retrain": 96.92671394799054,
+      "runtime_seconds": 0.5149900913238525,
+      "runtime_ms": 514.9900913238525,
+      "speedup_vs_retrain": 60.211597087996665,
+      "speedup_vs_federaser": 23.99026353861645,
+      "subspace_dimension_k": 64,
+      "storage_overhead": "1.07 MB",
+      "retained_clients_online": 0
+    }
+  }
+}

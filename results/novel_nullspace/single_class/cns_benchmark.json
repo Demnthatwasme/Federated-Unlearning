@@ -1,0 +1,33 @@
+{
+  "partition_mode": "single_class",
+  "forget_client": 9,
+  "models": {
+    "retrained": {
+      "overall_acc": 0.801,
+      "forget_acc": 0.0,
+      "forget_train_loss": 0.0,
+      "runtime_seconds": 27.634202480316162
+    },
+    "federaser": {
+      "overall_acc": 0.807,
+      "forget_acc": 0.0,
+      "forget_train_loss": 0.0,
+      "prediction_agreement_with_retrain": 100.0,
+      "runtime_seconds": 8.588333368301392,
+      "storage_overhead": "2.2 GB"
+    },
+    "fed_cns": {
+      "overall_acc": 0.794,
+      "forget_acc": 0.0,
+      "forget_train_loss": 0.0,
+      "prediction_agreement_with_retrain": 100.0,
+      "runtime_seconds": 0.49709391593933105,
+      "runtime_ms": 497.09391593933105,
+      "speedup_vs_retrain": 55.591512175515824,
+      "speedup_vs_federaser": 17.27708405376978,
+      "subspace_dimension_k": 64,
+      "storage_overhead": "1.07 MB",
+      "retained_clients_online": 0
+    }
+  }
+}

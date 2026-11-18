@@ -10,7 +10,7 @@ In Federated Learning (FL), distributed clients collaboratively train a shared g
 
 - **The Naive Approach (Retraining from Scratch)**: Discarding the model and retraining over all communication rounds without the withdrawn client is computationally prohibitive, communication-heavy, and wastes all prior collaborative computation.
 - **The Heuristic Approach (Output Masking / Weight Zeroing)**: Artificially forcing output logits or classifier biases to negative infinity (`bias = -50.0`) produces fake "100% forgotten" metrics without modifying the underlying feature representations.
-- **The Principled Solution (FedEraser)**: A landmark federated unlearning framework (Wang et al., IEEE/ACM IWQoS 2021) that trades central server storage for unlearning speed. By maintaining a historical log of global models and client parameter updates during FL rounds, FedEraser reconstructs the unlearned model along the original optimization trajectory using fast calibration steps executed exclusively by the retained clients.
+- **The Principled Solution (FedEraser)**: A landmark federated unlearning framework (Gaoyang Liu, Xiaoqiang Ma, Yang Yang, et al., IEEE/ACM IWQoS 2021) that trades central server storage for unlearning speed. By maintaining a historical log of global models and client parameter updates during FL rounds, FedEraser reconstructs the unlearned model along the original optimization trajectory using fast calibration steps executed exclusively by the retained clients.
 
 > **Note on MIA Auditing**: As instructed, Membership Inference Attack (MIA) auditing is **intentionally omitted** from this stage of the project and will be integrated in subsequent auditing phases.
 
