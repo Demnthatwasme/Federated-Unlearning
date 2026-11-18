@@ -1,0 +1,92 @@
+{
+  "config": {
+    "partition_mode": "multi_class",
+    "num_classes": 10,
+    "num_clients": 10,
+    "dirichlet_alpha": 0.5,
+    "forget_client": 9,
+    "num_rounds": 6,
+    "local_epochs": 2,
+    "learning_rate": 0.003,
+    "cali_steps": 4,
+    "cali_lr": 0.003,
+    "milestone_interval": 2,
+    "stage": "all",
+    "batch_size": 64,
+    "seed": 42,
+    "device": "cuda"
+  },
+  "partition_mode": "multi_class",
+  "forget_client": 9,
+  "forget_class_name": "Client 9",
+  "models": {
+    "original": {
+      "overall_acc": 0.93,
+      "retain_acc": 0.93,
+      "forget_acc": 0.9243498817966903,
+      "forget_conf": 0.8103811509651847,
+      "forget_train_loss": 0.3033802762240101,
+      "runtime_seconds": 34.903218030929565
+    },
+    "federaser": {
+      "overall_acc": 0.916,
+      "retain_acc": 0.916,
+      "forget_acc": 0.8936170212765957,
+      "forget_conf": 0.7514281335526782,
+      "forget_train_loss": 0.4045775053630766,
+      "runtime_seconds": 12.354748010635376,
+      "speedup_vs_retrain": 2.509834749879915,
+      "avg_forget_cam_drift": 0.212,
+      "avg_retain_cam_drift": 0.021,
+      "prediction_agreement_with_retrain": 93.61702127659575,
+      "redistribution_map": {}
+    },
+    "retrained": {
+      "overall_acc": 0.924,
+      "retain_acc": 0.924,
+      "forget_acc": 0.9030732860520094,
+      "forget_conf": 0.7910085564906363,
+      "forget_train_loss": 0.3546853022513378,
+      "runtime_seconds": 31.008375883102417
+    }
+  },
+  "gradcam_gallery_path": "results/multi_class/gradcam_unlearning_comparison.png",
+  "drift_records": [
+    {
+      "sample_idx": 0,
+      "true_class": "apple",
+      "is_forget": true,
+      "cam_drift": 0.05340319871902466
+    },
+    {
+      "sample_idx": 1,
+      "true_class": "apple",
+      "is_forget": true,
+      "cam_drift": 0.04252582788467407
+    },
+    {
+      "sample_idx": 2,
+      "true_class": "apple",
+      "is_forget": true,
+      "cam_drift": 0.005882918834686279
+    },
+    {
+      "sample_idx": 3,
+      "true_class": "apple",
+      "is_forget": false,
+      "cam_drift": 0.0040451884269714355
+    },
+    {
+      "sample_idx": 4,
+      "true_class": "apple",
+      "is_forget": false,
+      "cam_drift": 0.030294358730316162
+    },
+    {
+      "sample_idx": 5,
+      "true_class": "apple",
+      "is_forget": false,
+      "cam_drift": 0.02950376272201538
+    }
+  ]
+}

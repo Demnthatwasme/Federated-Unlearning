@@ -1,0 +1,106 @@
+{
+  "args": {
+    "stage": "all",
+    "num_classes": 100,
+    "rounds": 20,
+    "local_epochs": 1,
+    "batch_size": 64,
+    "lr": 0.001,
+    "mu": 1.0,
+    "frac": 1.0,
+    "img_size": 128,
+    "no_pretrained": false,
+    "forget_client": 9,
+    "skip_retrain": false,
+    "save_every": 5,
+    "unlearn_layers": "backbone.layer4,proj",
+    "energy": 0.95,
+    "n_retain": 20,
+    "unlearn_lr": 0.01,
+    "unlearn_epochs": 30,
+    "stop_acc": 2.0,
+    "gpu": 0,
+    "seed": 42
+  },
+  "forget_client": 9,
+  "class_name": "bottle",
+  "rows": [
+    {
+      "method": "Original",
+      "global": 7.669999450445175,
+      "retain": 7.696969509124756,
+      "d_retain": 0.0,
+      "forget": 5.0,
+      "probe": 56.99999928474426,
+      "mia_auc": 0.5182600021362305,
+      "cam_drift_forget": -1.7285346487483366e-08,
+      "cam_drift_retain": -1.4305114426349519e-08
+    },
+    {
+      "method": "Output masking",
+      "global": 7.620000094175339,
+      "retain": 7.696969509124756,
+      "d_retain": 0.0,
+      "forget": 0.0,
+      "probe": 56.99999928474426,
+      "mia_auc": 0.5182600021362305,
+      "cam_drift_forget": -1.7285346487483366e-08,
+      "cam_drift_retain": -1.4305114426349519e-08
+    },
+    {
+      "method": "Grad. ascent (naive)",
+      "global": 1.0099999606609344,
+      "retain": 1.0202020406723022,
+      "d_retain": -6.676767468452454,
+      "forget": 0.0,
+      "probe": 45.99999785423279,
+      "mia_auc": 0.4721599817276001,
+      "cam_drift_forget": 1.2349880933761597,
+      "cam_drift_retain": 0.8909546732902527
+    },
+    {
+      "method": "Uniform target (naive)",
+      "global": 3.619999811053276,
+      "retain": 3.6565656661987305,
+      "d_retain": -4.040403842926025,
+      "forget": 0.0,
+      "probe": 59.99999642372131,
+      "mia_auc": 0.5118799805641174,
+      "cam_drift_forget": 0.2279907912015915,
+      "cam_drift_retain": 0.31092369556427
+    },
+    {
+      "method": "Grad. ascent + null-space",
+      "global": 6.799999624490738,
+      "retain": 6.868686676025391,
+      "d_retain": -0.8282828330993652,
+      "forget": 0.0,
+      "probe": 59.99999642372131,
+      "mia_auc": 0.48833999037742615,
+      "cam_drift_forget": 1.192674994468689,
+      "cam_drift_retain": 0.011315709911286831
+    },
+    {
+      "method": "Uniform + null-space",
+      "global": 7.54999965429306,
+      "retain": 7.626262664794922,
+      "d_retain": -0.07070684432983398,
+      "forget": 0.0,
+      "probe": 57.999998331069946,
+      "mia_auc": 0.5216400027275085,
+      "cam_drift_forget": 0.07009774446487427,
+      "cam_drift_retain": 0.002781273564323783
+    },
+    {
+      "method": "Retrain (gold)",
+      "global": 7.039999961853027,
+      "retain": 7.111111164093018,
+      "d_retain": -0.5858583450317383,
+      "forget": 0.0,
+      "probe": 57.999998331069946,
+      "mia_auc": 0.5280399918556213,
+      "cam_drift_forget": 0.1278044581413269,
+      "cam_drift_retain": 0.10140735656023026
+    }
+  ]
+}

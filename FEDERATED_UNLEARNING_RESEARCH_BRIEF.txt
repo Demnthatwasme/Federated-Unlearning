@@ -1,0 +1,202 @@
+================================================================================
+FEDERATED UNLEARNING FOR VISION MODELS: SYSTEM ARCHITECTURE & RESEARCH BRIEF
+================================================================================
+Project: Federated Unlearning for Vision Models with Auditing & Visualization
+Target Dataset: CIFAR-100 (Image Classification)
+Framework: PyTorch + Flower (flwr) Federated Learning Architecture
+Compute Hardware: NVIDIA RTX A6000 GPU (Linux)
+Date: November 2026
+
+--------------------------------------------------------------------------------
+1. RESEARCH PROBLEM STATEMENT & OBJECTIVE
+--------------------------------------------------------------------------------
+Under privacy legislation such as the European Union's GDPR (Article 17: "Right
+to be Forgotten") and California's CCPA, participating clients in Federated 
+Learning (FL) have the legal entitlement to withdraw their data and demand that 
+all influence of their private contributions be erased from the trained global model.
+
+The Fundamental Dilemma:
+- Exact Retraining from Scratch (M_retrain): Discarding the model and re-running 
+  the entire federated learning process across all communication rounds excluding 
+  the withdrawn client is computationally prohibitive, consumes vast communication 
+  bandwidth, and wastes all prior collaborative work.
+- Naive Zeroing / Weight Masking: Setting output classifier weights or biases to 
+  arbitrary negative constants (e.g. bias = -50.0) is a cosmetic trick that zeroes 
+  out class recall without modifying the underlying feature representations or 
+  erasing memorized visual features from convolutional layers.
+- The Goal: Develop principled, verifiable federated unlearning methods that 
+  provably purge private contributions with minimal computational overhead while 
+  preserving model utility on retained data, audited via visual attribution 
+  (Grad-CAM) and empirical distribution metrics.
+
+--------------------------------------------------------------------------------
+2. SYSTEM ARCHITECTURE & MODEL DESIGN
+--------------------------------------------------------------------------------
+To prevent representation collapse under extreme Non-IID client partitioning, 
+the system employs a specialized federated vision backbone:
+
+1. Backbone: ResNet-18 initialized with ImageNet-pretrained convolutional weights.
+2. Frozen BatchNorm Running Statistics (freeze_bn):
+   - In extreme Non-IID or single-class client training, calculating batch mean 
+     and variance locally corrupts running statistics (destroying feature stability).
+   - All BatchNorm layers are frozen in evaluation mode, preserving robust 
+     pretrained normalization statistics.
+3. Scaled Cosine-Normalized Classifier Head:
+   - Instead of unbounded linear inner products, logits are computed on the 
+     hypersphere via scaled cosine similarity:
+       logits(x) = s * ( phi(x) / ||phi(x)||_2 ) * ( W^T / ||W||_2 )
+     where scale factor s = 20.0 and phi(x) is the 512-dim feature embedding.
+   - This bounds logit magnitudes, prevents gradient explosion from single-class 
+     batches, and enforces uniform angular separation.
+4. Prototype Centroid Initialization:
+   - Round 0 initializes each class prototype vector to its empirical normalized 
+     feature centroid:
+       W_c = normalize( E_{x in D_c}[phi(x)] )
+   - This provides immediate zero-shot class separation before federated rounds.
+5. Trainable Layers:
+   - Local client updates optimize base.layer4 (the final residual block) and the 
+     classifier head using SGD with momentum (lr=0.003, momentum=0.9, weight_decay=1e-4).
+
+--------------------------------------------------------------------------------
+3. THE TWO EXPERIMENTAL BENCHMARKS IMPLEMENTED
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+SETTING A: Single-Class Per Client Simplification (1 Client = 1 Class)
+--------------------------------------------------------------------------------
+- Setup: 10 clients total (Clients 0 to 9), holding CIFAR-100 classes 0 to 9.
+  * Client 0: apple            Client 5: bed
+  * Client 1: aquarium_fish    Client 6: bee
+  * Client 2: baby             Client 7: beetle
+  * Client 3: bear             Client 8: bicycle
+  * Client 4: beaver           Client 9: bottle (TARGET FORGOTTEN CLIENT)
+- Unlearning Request: Client 9 requests complete erasure of all its data.
+- Benchmark Results (6 FL Rounds, 2 Local Epochs, RTX A6000 GPU):
+
+  +---------------------------+------------+------------+-------------+-------------+----------+-------------------+
+  | Model                     | Retain Acc | Forget Acc | Forget Conf | Overall Acc | Runtime  | Speedup vs Retain |
+  +---------------------------+------------+------------+-------------+-------------+----------+-------------------+
+  | Original FL (M_orig)      |   89.11%   |   94.00%   |    0.840    |   89.60%    |  40.33s  | 1.0x (10 clients) |
+  | Retrained Gold (M_retrain)|   89.00%   |    0.00%   |    0.000    |   80.10%    |  36.24s  | (9 clients)       |
+  | FedEraser (M_unlearn)     |   89.67%   |    0.00%   |    0.000    |   80.70%    |  11.70s  | 3.10x faster      |
+  +---------------------------+------------+------------+-------------+-------------+----------+-------------------+
+
+Key Scientific Insights from Setting A:
+- 0.00% Forget Accuracy Explained: Because Client 9 was the sole contributor of 
+  bottles, neutralizing row 9 in the classifier causes the argmax to naturally 
+  divert test bottles to the closest retained semantic category.
+- Empirical Redistribution Map on M_unlearn:
+  * bed: 60%, beetle: 10%, apple: 9%, baby: 8%, bicycle: 8%, aquarium_fish: 4%, bear: 1%
+- Visual Attribution (Grad-CAM):
+  * Spatial drift on forgotten class (|Delta CAM|): 0.467 (significant erasure of bottle features).
+  * Spatial drift on retained classes: 0.006 (complete preservation of retained visual attention).
+
+--------------------------------------------------------------------------------
+SETTING B: Multi-Class Heterogeneous Non-IID Setup (Dirichlet alpha=0.5)
+--------------------------------------------------------------------------------
+- Setup: 10 clients, each holding samples across 8 to 10 classes under Dirichlet 
+  distribution Dir(alpha=0.5).
+- Unlearning Request: Client 09 requests complete erasure of its 423 private 
+  training images (177 bottles, 84 beavers, 51 babies, 33 bicycles, 26 bears, 
+  24 bees, 15 beds, 6 fish, 4 beetles, 3 apples).
+- Crucial Distinction: Retained clients (0 to 8) ALSO hold bottles, beavers, etc. 
+  Therefore, unlearning does NOT erase the general concept of a bottle from the 
+  model; it purges Client 09's specific private training instance memorization!
+- Benchmark Results (6 FL Rounds, 2 Local Epochs, RTX A6000 GPU):
+
+  +---------------------------+------------+------------------+-------------------+-------------+----------+-------------------+
+  | Model                     | Test Acc   | D_forget Acc     | D_forget CE Loss  | Forget Conf | Runtime  | Speedup vs Retain |
+  +---------------------------+------------+------------------+-------------------+-------------+----------+-------------------+
+  | Original FL (M_orig)      |   93.00%   |   92.43%         | 0.3034 (Memorized)|    0.810    |  32.92s  | 1.0x (10 clients) |
+  | Retrained Gold (M_retrain)|   92.50%   |   90.31%         | 0.3547 (Unseen)   |    0.791    |  31.12s  | (9 clients)       |
+  | FedEraser (M_unlearn)     |   91.60%   |   89.36%         | 0.4048 (Unlearned)|    0.751    |  12.91s  | 2.41x faster      |
+  +---------------------------+------------+------------------+-------------------+-------------+----------+-------------------+
+
+Key Scientific Insights from Setting B:
+- Prediction Agreement with Retrained Gold: On Client 09's 423 private images, 
+  M_unlearn and M_retrain make the exact same prediction on 396 out of 423 samples 
+  (93.61% agreement rate).
+- Memorization Loss Purge: Cross-entropy loss on D_forget rises from 0.3034 (memorized) 
+  to 0.4048 (unlearned), closely mirroring unseen test loss.
+- Audit on Client 09's 177 Bottles:
+  * M_orig Bottle Confidence: 0.884 (high memorized confidence)
+  * M_unlearn Bottle Confidence: 0.794 (softened to generalization level)
+  * Bottle Prediction Agreement (M_unlearn == M_retrain): 94.35% (167 / 177)
+  * Mean Grad-CAM Drift on Bottles: 0.212 (peaks up to 0.874 on individual instances)
+  * Mean Grad-CAM Drift on Retained Data: 0.021 (10x lower drift)
+
+--------------------------------------------------------------------------------
+4. HOW THE FEDERASER BASELINE WORKS (AND ITS BOTTLENECKS)
+--------------------------------------------------------------------------------
+FedEraser (Wang et al., IEEE/ACM IWQoS 2021) trades server storage for speed:
+1. Historical Logging during FL:
+   The server caches initial weights W_0, all round checkpoints W_1 ... W_T, and 
+   the client parameter update vectors Delta W_{t, k} = W_{t, k} - W_{t-1}.
+2. Reconstruction from W_0:
+   The server initializes unlearned model W'_0 = W_0.
+3. Milestone Calibration Rounds (e.g. rounds 2, 4, 6):
+   - Retained clients run short calibration steps (E_cali = 4 mini-batches) 
+     from W'_{t-1} to produce calibration update Delta W'_{t, k}.
+   - The server scales the update direction by historical momentum magnitude:
+       W~_{t, k} = ( ||Delta W_{t, k}|| / (||Delta W'_{t, k}|| + eps) ) * Delta W'_{t, k}
+   - The server averages over retained clients R:
+       W'_t = W'_{t-1} + sum_{k in R} (n_k / N_R) * W~_{t, k}
+4. Fast Forward Rounds (e.g. rounds 1, 3, 5):
+   - Retained clients do ZERO computation.
+   - The server fast-forwards using retained historical updates in 0.28 seconds.
+
+BOTTLENECKS & LIMITATIONS OF FEDERASER:
+1. Massive Storage Footprint: Server must maintain a historical cache of all 
+   checkpoints and client update tensors: O(T * K * |theta|). For large models, 
+   this is gigabytes or terabytes of storage.
+2. Active Retained Client Participation: Retained clients must be online and 
+   willing to execute calibration computation whenever an unlearning request arrives.
+3. Lack of Provable Guarantees: FedEraser is a heuristic optimization projection; 
+   it lacks formal (epsilon, delta)-certified unlearning or DP guarantees.
+4. Trajectory Drift: Across longer horizons (T > 20), calibrated directions 
+   accumulate approximation errors relative to exact retraining.
+
+--------------------------------------------------------------------------------
+5. AUDITING & INTERPRETABILITY MECHANISMS
+--------------------------------------------------------------------------------
+1. Grad-CAM Spatial Attribution:
+   - Target layer: base.layer4 (post-residual, post-ReLU output of ResNet-18 block 4).
+   - Spatial resolution: 4x4 feature grid interpolated to 128x128 input dimensions.
+   - Attention Drift Metric:
+       Drift(CAM1, CAM2) = 1.0 - PearsonCorrelation(vec(CAM1), vec(CAM2))
+     (0.0 = identical spatial attention, 1.0 = uncorrelated).
+2. Human Contour Perception vs CNN Receptive Fields:
+   - Late-layer CNN representations respond to contextual textures and surface 
+     contrast (contact shadows, liquid reflections) rather than line-art silhouettes.
+   - Grad-CAM acts as a differential audit: measuring whether gradient evidence 
+     for the forgotten data has collapsed relative to the original model.
+3. Note on Membership Inference Attacks (MIA):
+   - Intentionally deferred from the current phase; planned as the next milestone.
+
+--------------------------------------------------------------------------------
+6. PROMPTS & OPEN DIRECTIONS FOR NOVEL UNLEARNING METHODS
+--------------------------------------------------------------------------------
+When providing this summary to an AI research assistant, use the following prompt:
+
+"Based on the system architecture, benchmarks, and FedEraser bottlenecks documented 
+above, propose 3 novel federated unlearning methods that outperform FedEraser. 
+Specifically focus on:
+1. Zero-Storage Unlearning: Methods that eliminate the need for the central server 
+   to store historical checkpoints W_t and client update tensors Delta W_{t, k}.
+2. Client-Free / Server-Only Unlearning: Methods where the central server can 
+   scrub the unlearned client's contributions without requiring retained clients 
+   to wake up or perform calibration training.
+3. Subspace / Null-Space Feature Scrubbing: Methods leveraging the Fisher 
+   Information Matrix (FIM), influence functions, or singular value decomposition 
+   (SVD) on class prototypes to project weights onto the null space of the forgotten 
+   client's representations:
+     W_unlearn = W_orig * (I - P_{forget})
+4. Certified / Provable Bounds: Formulations providing (epsilon, delta)-unlearning 
+   guarantees while preserving >90% test accuracy on CIFAR-100.
+
+For each proposed method, provide:
+- Theoretical mathematical formulation and loss objective
+- Algorithmic workflow (Server-side and Client-side steps)
+- Time and storage complexity analysis compared to FedEraser
+- Expected trade-offs in accuracy, unlearning fidelity, and compute cost."
+================================================================================

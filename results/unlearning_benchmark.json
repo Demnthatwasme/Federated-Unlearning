@@ -1,0 +1,92 @@
+{
+  "config": {
+    "num_classes": 10,
+    "forget_client": 9,
+    "num_rounds": 6,
+    "local_epochs": 2,
+    "learning_rate": 0.003,
+    "cali_steps": 4,
+    "cali_lr": 0.003,
+    "milestone_interval": 2,
+    "stage": "all",
+    "batch_size": 64,
+    "seed": 42,
+    "device": "cuda"
+  },
+  "forget_client": 9,
+  "forget_class_name": "bottle",
+  "models": {
+    "original": {
+      "retain_acc": 0.8911111111111111,
+      "forget_acc": 0.94,
+      "forget_conf": 0.840057487487793,
+      "overall_acc": 0.896,
+      "runtime_seconds": 30.35740351676941
+    },
+    "federaser": {
+      "retain_acc": 0.8966666666666666,
+      "forget_acc": 0.0,
+      "forget_conf": 4.9283826956525446e-06,
+      "overall_acc": 0.807,
+      "runtime_seconds": 8.588333368301392,
+      "speedup_vs_retrain": 3.217644366520635,
+      "avg_forget_cam_drift": 0.4668189287185669,
+      "avg_retain_cam_drift": 0.00574578841527303,
+      "redistribution_map": {
+        "apple": 9,
+        "aquarium_fish": 4,
+        "baby": 8,
+        "bear": 1,
+        "bed": 60,
+        "beetle": 10,
+        "bicycle": 8
+      }
+    },
+    "retrained": {
+      "retain_acc": 0.89,
+      "forget_acc": 0.0,
+      "forget_conf": 1.915417378768325e-06,
+      "overall_acc": 0.801,
+      "runtime_seconds": 27.634202480316162
+    }
+  },
+  "gradcam_gallery_path": "results/gradcam_unlearning_comparison.png",
+  "drift_records": [
+    {
+      "sample_idx": 0,
+      "true_class": "bottle",
+      "is_forget": true,
+      "cam_drift": 0.05377817153930664
+    },
+    {
+      "sample_idx": 1,
+      "true_class": "bottle",
+      "is_forget": true,
+      "cam_drift": 0.20858728885650635
+    },
+    {
+      "sample_idx": 2,
+      "true_class": "bottle",
+      "is_forget": true,
+      "cam_drift": 1.1380913257598877
+    },
+    {
+      "sample_idx": 3,
+      "true_class": "apple",
+      "is_forget": false,
+      "cam_drift": 0.011066257953643799
+    },
+    {
+      "sample_idx": 4,
+      "true_class": "aquarium_fish",
+      "is_forget": false,
+      "cam_drift": 0.005760252475738525
+    },
+    {
+      "sample_idx": 5,
+      "true_class": "baby",
+      "is_forget": false,
+      "cam_drift": 0.0004108548164367676
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "args": {
+    "stage": "train",
+    "num_classes": 10,
+    "rounds": 5,
+    "local_epochs": 1,
+    "batch_size": 64,
+    "lr": 0.01,
+    "mu": 0.0,
+    "frac": 1.0,
+    "img_size": 128,
+    "no_pretrained": false,
+    "forget_client": 9,
+    "skip_retrain": false,
+    "save_every": 5,
+    "unlearn_layers": "backbone.layer4,proj",
+    "energy": 0.95,
+    "n_retain": 20,
+    "unlearn_lr": 0.01,
+    "unlearn_epochs": 30,
+    "stop_acc": 2.0,
+    "gpu": 0,
+    "seed": 42
+  },
+  "history": [
+    {
+      "round": 1,
+      "global_acc": 10.000000149011612,
+      "retain_acc": 11.11111068725586,
+      "forget_class_acc": 0.0
+    },
+    {
+      "round": 2,
+      "global_acc": 11.800000816583633,
+      "retain_acc": 13.11111068725586,
+      "forget_class_acc": 0.0
+    },
+    {
+      "round": 3,
+      "global_acc": 10.000000149011612,
+      "retain_acc": 11.11111068725586,
+      "forget_class_acc": 0.0
+    },
+    {
+      "round": 4,
+      "global_acc": 10.000000149011612,
+      "retain_acc": 11.11111068725586,
+      "forget_class_acc": 0.0
+    },
+    {
+      "round": 5,
+      "global_acc": 10.000000149011612,
+      "retain_acc": 11.11111068725586,
+      "forget_class_acc": 0.0
+    }
+  ]
+}

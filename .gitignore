@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch checkpoints and model weights (prevent committing multi-GB weights)
+checkpoints/**/*.pt
+checkpoints/*.pt
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Dataset directories (root level only)
+/dataset/
+/data/
+*.tar.gz
+*.zip
+
+# Virtual environments
+.venv
+.venv/
+venv
+venv/
+env
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS and Editor artifacts
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local cache
+.matplotlib/
