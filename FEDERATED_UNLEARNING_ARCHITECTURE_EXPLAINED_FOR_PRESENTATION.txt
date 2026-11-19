@@ -1,13 +1,3 @@
-================================================================================
-FEDERATED VISUAL UNLEARNING: COMPLETE ARCHITECTURE & DEFENSE PRIMER
-================================================================================
-A First-Principles, Zero-Jargon Technical Guide for Presenting and Defending:
-"Federated Visual Unlearning with Explainable AI Auditing & Null-Space Scrubbing"
-Author / Research Partner: Antigravity Assistant & Engineering Partner
-Target Audience: Evaluators, Mentors, and Non-Specialist Reviewers
-Repository: https://github.com/Demnthatwasme/Federated-Unlearning
-================================================================================
-
 TABLE OF CONTENTS:
 1. The 30-Second Elevator Pitch & Plain-English Analogies
 2. What is Federated Learning (FL) and Why Can't We Just "Delete" Data?

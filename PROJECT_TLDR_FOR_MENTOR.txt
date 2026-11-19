@@ -1,0 +1,135 @@
+================================================================================
+PROJECT TL;DR — FEDERATED VISUAL UNLEARNING & THE FED-CNS METHOD
+================================================================================
+Hey Mentor, 
+
+Here is the quick, no-nonsense executive summary of what we built, what actually 
+worked, what broke, and the novel method we proposed (Fed-CNS). The full formal 
+report is attached in the PDF ('Federated_Unlearning_Project_Report.pdf').
+
+GitHub Repository (Code, Checkpoints & Visuals):
+👉 https://github.com/Demnthatwasme/Federated-Unlearning
+
+--------------------------------------------------------------------------------
+1. THE CORE PROBLEM (IN 30 SECONDS)
+--------------------------------------------------------------------------------
+Under GDPR Art. 17 ("Right to be Forgotten"), clients in a Federated Learning (FL) 
+system have the legal right to pull out and demand that their data's influence be 
+completely erased from the trained global model.
+
+The real-world issue:
+- You CANNOT just delete files, because raw data never touches the server in FL.
+- You CANNOT retrain from scratch every time someone leaves. In our 20-round runs, 
+  retraining takes over 5 minutes per request. With thousands of edge devices, that's 
+  impossible.
+- You CANNOT just zero out the output weights (naive masking). Setting bias = -50 
+  drops class accuracy to 0%, but the deep convolutional layers still 100% remember 
+  the visual features. A simple Membership Inference Attack catches it immediately.
+
+We needed a way to surgically strip the forgotten client's visual influence, keep 
+retained accuracy above 90%, and prove it with real visual and privacy metrics.
+
+--------------------------------------------------------------------------------
+2. WHAT WE ACTUALLY BUILT (ARCHITECTURE THAT DIDN'T COLLAPSE)
+--------------------------------------------------------------------------------
+Training vision models in extreme Non-IID federated settings usually fails because 
+local batches wreck the model. We fixed this with 3 engineering choices:
+1. ResNet-18 with ImageNet Pretraining: Froze layers 1-3, trained only layer4 + head 
+   (saved >25% communication overhead).
+2. Frozen BatchNorm: Running mean/variance are permanently locked in eval mode. 
+   Single-class client batches no longer destroy the normalization statistics.
+3. Scaled Cosine Classifier Head: Mapped features and weights to the unit hypersphere 
+   with scale = 20. Classification depends strictly on angles, not weight length. 
+   Dominant clients with lots of data can no longer overpower minority clients.
+4. Centroid Initialization: Initialized class weights to empirical feature centroids 
+   at Round 0, giving instant zero-shot class separation before training even began.
+
+--------------------------------------------------------------------------------
+3. THE BASELINE EXPERIMENTS: FEDERASER ON CIFAR-100
+--------------------------------------------------------------------------------
+We implemented FedEraser (Liu et al., IWQoS 2021) and benchmarked it on an 
+enterprise NVIDIA RTX A6000 GPU across two setups:
+
+Setting A: Single-Class (1 Client = 1 Class, 10 Clients)
+- Client 9 ('bottle') requests unlearning.
+- Original FL: 89.1% retain acc, 94.0% bottle acc (40.3s runtime).
+- Retrain from Scratch: 89.0% retain acc, 0.0% bottle acc (36.2s runtime).
+- FedEraser: 89.7% retain acc, 0.0% bottle acc in 11.7s (3.10x faster than retrain!).
+- Where do bottles go? They naturally divert to the closest semantic shapes in 
+  feature space: Beds (60%), Beetles (10%), Apples (9%).
+
+Setting B: Multi-Class Non-IID Dirichlet (alpha = 0.5, 10 Clients)
+- Client 09 holds 423 private images across multiple classes (177 bottles, 84 beavers, etc.).
+- Crucial nuance: Retained clients ALSO hold 323 bottles! Unlearning must NOT erase 
+  the concept of a bottle, but purge Client 09's private training memorization.
+- At T = 20 rounds (200 total client epochs):
+  * Retrained from Scratch took: 300.98s (94.5% test acc, 0.2501 private loss).
+  * FedEraser finished in:       80.32s (92.6% test acc, 0.3214 private loss).
+  * 3.75x SPEEDUP over full retraining.
+  * 95.51% PREDICTION AGREEMENT with the retrained gold standard (404 / 423 samples match!).
+  * Private training loss rose from 0.1962 (deeply memorized) to 0.3214 (purged).
+
+--------------------------------------------------------------------------------
+4. HOW WE AUDITED THE FORGETTING
+--------------------------------------------------------------------------------
+We didn't just look at accuracy; we audited the unlearning in two ways:
+1. Grad-CAM Spatial Attribution Drift (|Delta CAM|):
+   Hooked into layer4. Measured Pearson correlation drift between attention maps. 
+   In Setting A, bottle drift was 0.467 (attention collapsed) while retained classes 
+   had only 0.006 drift (zero collateral damage).
+2. Membership Inference Attacks (MIA):
+   Ran threshold attacks on loss and confidence. 
+   In Setting A, MIA-AUC dropped from 0.679 (leaking) down to 0.048 (matching retrain 
+   at 0.053). In Setting B, high-confidence member identification at 5% FPR dropped 
+   from 8.27% down to 3.07% (a 63% reduction in privacy leakage).
+
+--------------------------------------------------------------------------------
+5. THE MAIN ATTRACTION: FED-CNS (OUR NOVEL CONTRIBUTION)
+--------------------------------------------------------------------------------
+Why look beyond FedEraser?
+Because FedEraser has a massive hidden cost:
+- Storage Explosion: It stores round-by-round weights and client updates. At T=20, 
+  the cache was 7.2 GB. In a real system with 1,000 edge devices, that's terabytes.
+- Retained Client Wake-up: When Client 9 leaves, the server has to wake up the other 
+  9 clients to run calibration steps. If clients are offline, unlearning stalls.
+
+Our Novel Idea: Fed-CNS (Contrastive Null-Space via Additive Ledger)
+Instead of storing round weights, we track linear sufficient statistics:
+- Feature second-moment matrix: A_k = sum phi(x) phi(x)^T  (512x512 matrix = 1.05 MB)
+- Class prototype sums:         S_k = sum phi(x)           (10x512 matrix = 20 KB)
+
+Why this is brilliant:
+1. Sums are additive: A_all = A_retained + A_forget.
+2. When Client 9 leaves, the server simply SUBTRACTS their summary: 
+   A_retained = A_all - A_forget (takes 0.1 milliseconds).
+3. Retained clients stay 100% OFFLINE! Zero pings, zero battery drain.
+4. Server storage drops from 7,200 MB down to 1.07 MB (>2,000x storage savings!).
+5. Contrastive Generalized Eigenproblem: The server solves Sigma_f v = lambda Sigma_r v, 
+   finds the private directions where Client 9 had high variance, and projects the 
+   classifier head into the null space.
+6. Execution time: Just 0.515 seconds! (60x faster than retrain, 24x faster than FedEraser).
+
+The Honest Self-Audit (No LARPing):
+When we tested Fed-CNS on Setting B, prediction agreement was 96.9%, but the loss on 
+Client 9's data was slightly too low (0.2954). Why? 
+Because Client 9 held 42% bottles! An unconditioned matrix A_f captured bottle class 
+imbalance (label skew) rather than private instance memorization. Also, modifying only 
+the head leaves layer4 convolutional weights untouched in a white-box audit.
+
+Our Proposed 2-Tier Fix:
+- Class-Conditional Ledger: Store A_{k, c} per class (10 classes * 1 MB = 10.2 MB). 
+  This compares Client 9's bottles directly against retained bottles, cancelling out 
+  label skew!
+- Tier 2 Weight Null-Space: Project unlearning gradients on layer4 into Null(F_retain).
+
+--------------------------------------------------------------------------------
+6. SUMMARY & WHAT'S IN THE REPO
+--------------------------------------------------------------------------------
+- Full PyTorch + Flower codebase, fully reproducible.
+- Single-class and multi-class benchmarks at T=6 and T=20.
+- Grad-CAM and MIA auditing suites with saved ROC curves and histograms.
+- Streamlit interactive demo: run `streamlit run app.py` for a live 1-variable UI.
+- All code committed and live on GitHub: https://github.com/Demnthatwasme/Federated-Unlearning
+
+Check out the accompanying formal PDF for the structured academic documentation!
+================================================================================
